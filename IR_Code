@@ -1,0 +1,88 @@
+#include<LiquidCrystal.h>
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
+
+int timer1;
+int timer2;
+
+float Time;
+
+int flag1 = 0;
+int flag2 = 0;
+
+float distance = 1;
+float speed;
+float acceleration;
+float Force; 
+
+
+int ir_s1 = A0;
+int ir_s2 = A1;
+
+int buzzer = 13;
+
+void setup(){
+  pinMode(ir_s1, INPUT);
+  pinMode(ir_s2, INPUT);
+  pinMode(buzzer, OUTPUT);
+  
+  lcd.begin(16,2);
+  lcd.clear();
+  lcd.setCursor(1,0);
+  lcd.print( " ITS TIME TO");
+  lcd.setCursor(0,1);
+  lcd.print("TEST YOUR PUNCH!");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+if(digitalRead (ir_s1) == LOW && flag1==0){timer1 = millis(); flag1=1;}
+
+if(digitalRead (ir_s2) == LOW && flag2==0){timer2 = millis(); flag2=1;} //WHEN SWITCHING TO PUNCHING BAG TURN s1 INTO HIGH BC IT WILL ALWAYS HAVE CONTACT.
+
+if (flag1==1 or flag2==1){
+     if(timer1 > timer2){Time = timer1 - timer2;}
+else if(timer2 > timer1){Time = timer2 - timer1;}
+ Time=Time/1000;//convert millisecond to second
+ speed=(distance/Time);//v=d/t
+ acceleration=(speed/Time);//division by meters per Km
+ Force=(5*acceleration);
+ 
+}
+
+//if(speed==0){ 
+//lcd.clear();
+//lcd.setCursor(0, 0); 
+                   
+//}
+if(flag1==1 && flag2==1){
+    lcd.clear(); 
+    lcd.setCursor(0, 0); 
+    lcd.print("Computing...    ");
+    delay(500);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Punch Force:");
+    lcd.print(Force,1);
+    lcd.print("N");
+    lcd.setCursor(0, 1); 
+  if(Force > 5000){lcd.print("  STRONG PUNCH  "); digitalWrite(buzzer, HIGH);}
+            else if( Force > 1500 and speed < 5000) {lcd.print("  NORMAL PUNCH   ");}
+            else if(Force < 1500) {lcd.print("  weak PUNCH   ");}
+           
+    delay(2000);
+    digitalWrite(buzzer, LOW);
+    speed = 0;
+    flag1 = 0;
+    flag2 = 0;    
+    
+ }
+else{
+  lcd.clear();
+  lcd.setCursor(1,0);
+  lcd.print("Invalid Punch");
+  lcd.setCursor(1,1)  ;
+  lcd.print("Punch AGAIN!"); 
+  delay(20);
+ }
+}
